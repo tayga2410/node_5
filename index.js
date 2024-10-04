@@ -1,10 +1,14 @@
-const Sequeleze = require ('sequelize');
+const Sequelize = require('sequelize');
+const config = require('./config.json').development;
 
-const sequelize = new Sequeleze('mysql', 'root', '', ({
-    host: '127.0.0.1',
-    dialect: 'mysql'
-})) 
+const sequelize = new Sequelize(config.database, config.username, config.password, {
+  host: config.host,
+  dialect: config.dialect,
+});
 
-sequelize.authenticate().then((res) => {
-    console.log('sucess', res)
-}).catch((err) => console.log('err', err))
+const db = require('./models')(Sequelize, sequelize);
+
+sequelize.sync()
+  .then(() => console.log('success'))
+  .catch(err => console.error('err', err));
+
