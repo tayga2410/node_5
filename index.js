@@ -1,6 +1,10 @@
 const Sequelize = require("sequelize");
 const config = require("./config.json").development;
 
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
 const sequelize = new Sequelize(
   config.database,
   config.username,
@@ -18,81 +22,34 @@ sequelize
   .then(() => console.log("success"))
   .catch((err) => console.error("err", err));
 
-  db.weapons.bulkCreate([
-    {
-      name: "Katana",
-      dps: 100
-    },
-    {
-      name: "Nunchaku",
-      dps: 80
-    },
-    {
-      name: "Bo Staff",
-      dps: 70
-    },
-    {
-      name: "Sai",
-      dps: 90
+  app.get('/turtles', async (req, res) => {
+    try {
+      const turtles = await db.turtles.findAll(); 
+      res.json(turtles);
+    } catch (error) {
+      console.error('Ошибка при получении черепашек:', error);
+      res.status(500).send('Ошибка при получении черепашек.');
     }
-  ])
-  .then(() => console.log("Weapons created"))
-  .catch(err => console.error("Error creating weapons:", err));
+  });
 
-  db.pizzas.bulkCreate([
-    {
-      name: "Mozzarella",
-      description: "Classic Mozzarella Pizza",
-      calories: 800
-    },
-    {
-      name: "Pepperoni",
-      description: "Spicy Pepperoni Pizza",
-      calories: 900
-    },
-    {
-      name: "Hawaiian",
-      description: "Pizza with ham and pineapple",
-      calories: 850
-    },
-    {
-      name: "Veggie",
-      description: "Pizza with mixed vegetables",
-      calories: 700
+  app.get('/mozarella', async (req, res) => {
+    try {
+      const turtlesWithMozzarella = await db.turtles.findAll({
+        include: {
+          model: db.pizzas,
+          as: 'favoritePizza',
+          where: { name: 'Mozzarella' }
+        }
+      });
+      res.json(turtlesWithMozzarella);
+    } catch (error) {
+      console.error('Ошибка при получении черепашек с пиццей Mozzarella:', error);
+      res.status(500).send('Ошибка при получении черепашек с пиццей Mozzarella.');
     }
-  ])
-  .then(() => console.log("Pizzas created"))
-  .catch(err => console.error("Error creating pizzas:", err));
+  });
 
-  db.turtles.bulkCreate([
-    {
-      name: "Leonardo",
-      color: "Blue",
-      weaponId: 1, 
-      firstFavoritePizzaId: 1, 
-      secondFavoritePizzaId: 2 
-    },
-    {
-      name: "Michelangelo",
-      color: "Orange",
-      weaponId: 2,  
-      firstFavoritePizzaId: 2, 
-      secondFavoritePizzaId: 3  
-    },
-    {
-      name: "Donatello",
-      color: "Purple",
-      weaponId: 3, 
-      firstFavoritePizzaId: 4, 
-      secondFavoritePizzaId: 1  
-    },
-    {
-      name: "Raphael",
-      color: "Red",
-      weaponId: 4, 
-      firstFavoritePizzaId: 3,  
-      secondFavoritePizzaId: 4  
-    }
-  ])
-  .then(() => console.log("Turtles created"))
-  .catch(err => console.error("Error creating turtles:", err));
+
+
+  app.listen(PORT, () => {
+    console.log(`Сервер запущен на порту ${PORT}`);
+  });
