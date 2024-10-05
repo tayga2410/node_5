@@ -9,7 +9,7 @@ module.exports = (Sequelize, sequelize) => {
   const pizzas = Pizza(Sequelize, sequelize);
 
   turtles.belongsTo(weapons, { foreignKey: 'weaponId' });
-  turtles.belongsTo(pizzas, { foreignKey: 'favoritePizzaId', as: 'favoritePizza' }); 
+  turtles.belongsTo(pizzas, { foreignKey: 'favoritePizzaId', as: 'favoritePizza' });
 
   return {
     turtles,

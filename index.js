@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 const config = require("./config.json").development;
 
-const express = require('express');
+const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -22,34 +22,53 @@ sequelize
   .then(() => console.log("success"))
   .catch((err) => console.error("err", err));
 
-  app.get('/turtles', async (req, res) => {
-    try {
-      const turtles = await db.turtles.findAll(); 
-      res.json(turtles);
-    } catch (error) {
-      console.error('Ошибка при получении черепашек:', error);
-      res.status(500).send('Ошибка при получении черепашек.');
-    }
-  });
+app.get("/turtles", async (req, res) => {
+  try {
+    const turtles = await db.turtles.findAll();
+    res.json(turtles);
+  } catch (error) {
+    console.error("Ошибка при получении черепашек:", error);
+    res.status(500).send("Ошибка при получении черепашек.");
+  }
+});
 
-  app.get('/mozarella', async (req, res) => {
-    try {
-      const turtlesWithMozzarella = await db.turtles.findAll({
-        include: {
-          model: db.pizzas,
-          as: 'favoritePizza',
-          where: { name: 'Mozzarella' }
-        }
-      });
-      res.json(turtlesWithMozzarella);
-    } catch (error) {
-      console.error('Ошибка при получении черепашек с пиццей Mozzarella:', error);
-      res.status(500).send('Ошибка при получении черепашек с пиццей Mozzarella.');
-    }
-  });
+app.get("/mozarella", async (req, res) => {
+  try {
+    const turtlesWithMozzarella = await db.turtles.findAll({
+      include: {
+        model: db.pizzas,
+        as: "favoritePizza",
+        where: { name: "Mozzarella" },
+      },
+    });
+    res.json(turtlesWithMozzarella);
+  } catch (error) {
+    console.error("Ошибка при получении черепашек с пиццей Mozzarella:", error);
+    res.status(500).send("Ошибка при получении черепашек с пиццей Mozzarella.");
+  }
+});
+
+app.get("/favorite-pizzas", async (req, res) => {
+  try {
+    const favoritePizzas = await db.pizzas.findAll({
+      include: [
+        {
+          model: db.turtles,
+          as: "favoritePizza",
+          required: true,
+        },
+      ],
+      group: ["pizzas.id"],
+    });
+
+    res.json(favoritePizzas);
+  } catch (error) {
+    console.error("Ошибка при получении любимых пицц:", error);
+    res.status(500).send("Ошибка при получении любимых пицц.");
+  }
+});
 
 
-
-  app.listen(PORT, () => {
-    console.log(`Сервер запущен на порту ${PORT}`);
-  });
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на порту ${PORT}`);
+});
