@@ -129,6 +129,47 @@ app.get('/weapons-count', async (req, res) => {
   }
 });
 
+app.get('/pizzas/:id', async (req, res) => {
+  const pizzaId = req.params.id;
+
+  try {
+    const pizza = await db.pizzas.findOne({
+      where: { id: pizzaId },
+    });
+
+    if (!pizza) {
+      return res.status(404).json({ message: 'Пицца не найдена.' });
+    }
+
+    res.status(200).json(pizza);
+  } catch (error) {
+    console.error('Ошибка при получении пиццы:', error);
+    res.status(500).json({ message: 'Ошибка при получении пиццы.' });
+  }
+});
+
+app.put('/turtles/:id/favorite-pizza', async (req, res) => {
+  const turtleId = req.params.id;
+  const { favoritePizzaId } = req.body; 
+
+  try {
+    const turtle = await db.turtles.findByPk(turtleId);
+
+    if (!turtle) {
+      return res.status(404).json({ message: 'Черепашка не найдена.' });
+    }
+
+    turtle.favoritePizzaId = favoritePizzaId;
+
+    await turtle.save(); 
+
+    res.status(200).json(turtle); 
+  } catch (error) {
+    console.error('Ошибка при добавлении любимой пиццы:', error);
+    res.status(500).json({ message: 'Ошибка при добавлении любимой пиццы.' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
 });
